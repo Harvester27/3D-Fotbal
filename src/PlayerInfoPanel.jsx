@@ -24,6 +24,16 @@ export const PlayerInfoPanel = ({ onCustomizeClick }) => {
     coachLevel: playerDataManager.training.coachLevel
   });
 
+  const monthlyRewards = Array.from({ length: 30 }, (_, i) => {
+    const day = i + 1;
+    const baseReward = 500000;
+    const streakBonus = Math.min(day * 100000, 2000000);
+    const coins = baseReward + streakBonus;
+    const gems = day % 7 === 0 ? 5 * Math.floor(day / 7) : 0;
+    const training = day % 3 === 0 ? 1 : 0;
+    return { day, coins, gems, training };
+  });
+
   // Získej top 3 atributy hráče
   function getTopAttributes() {
     const allAttributes = [];
@@ -185,7 +195,7 @@ export const PlayerInfoPanel = ({ onCustomizeClick }) => {
     const updateData = () => {
       setPlayerData(playerDataManager.getPlayerSummary());
       setMoneyFormat(playerDataManager.getFormattedMoney());
-      
+
       setPlayerRatings({
         overall: playerDataManager.getOverallRating(),
         position: playerDataManager.getPositionRating('CAM'),
@@ -196,6 +206,9 @@ export const PlayerInfoPanel = ({ onCustomizeClick }) => {
         focus: playerDataManager.training.focus,
         coachLevel: playerDataManager.training.coachLevel
       });
+
+      // Po načtení dat znovu ověř denní odměnu
+      checkDailyReward();
     };
 
     playerDataManager.addEventListener('coinsChanged', updateData);
@@ -808,10 +821,24 @@ export const PlayerInfoPanel = ({ onCustomizeClick }) => {
         }}>
           <div style={{ marginBottom: '4px' }}>🎁 Denní odměna za {rewardCooldown}h</div>
           <div style={{ fontSize: '10px', opacity: 0.7 }}>
-            Streak: {playerDataManager.dailyRewards.streak} dní
+          Streak: {playerDataManager.dailyRewards.streak} dní
           </div>
         </div>
       )}
+
+      {/* Měsíční přehled odměn */}
+      <details style={{ marginTop: '10px', fontSize: '12px', color: '#ccc' }}>
+        <summary style={{ cursor: 'pointer' }}>📅 Odměny na 30 dní</summary>
+        <ul style={{ listStyle: 'none', padding: 0, margin: '5px 0', maxHeight: '150px', overflowY: 'auto' }}>
+          {monthlyRewards.map(r => (
+            <li key={r.day} style={{ marginBottom: '2px' }}>
+              Den {r.day}: 🪙 +{r.coins}
+              {r.training > 0 && <span> 🏋️ +{r.training}</span>}
+              {r.gems > 0 && <span> 💎 +{r.gems}</span>}
+            </li>
+          ))}
+        </ul>
+      </details>
 
       {/* Quick Training Reminder */}
       {trainingInfo.dailyPoints > 0 && (
