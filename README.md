@@ -68,3 +68,21 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+### Logging
+
+Debug messages are routed through `src/utils/logger.js`. By default, debug output
+is shown only when `NODE_ENV` is not `production`. To enable verbose logging in
+production, set the environment variable `DEBUG=true` before starting the app:
+
+```
+DEBUG=true npm start
+```
+
+Use the logger by importing from `./utils/logger.js`:
+
+```
+import * as logger from './utils/logger.js';
+logger.info('Something happened');
+logger.debug('Detailed info');
+```

@@ -1,5 +1,6 @@
 // src/StadiumManager/StadiumManagerSelection.js - 🎯 SELECTION SYSTEM
 import { THREE } from '../three.js';
+import * as logger from '../utils/logger.js';
 
 export class StadiumManagerSelection {
   constructor(stadiumManager) {
@@ -30,7 +31,7 @@ export class StadiumManagerSelection {
       this.stadiumManager.scene.add(glowHelper);
       this.stadiumManager.selectedGlow = glowHelper;
       
-      console.log(`🟠 Orange outline created for ${selectedObject.type}`);
+      logger.debug(`🟠 Orange outline created for ${selectedObject.type}`);
     }
   }
 
@@ -61,7 +62,7 @@ export class StadiumManagerSelection {
       this.stadiumManager.scene.add(glowHelper);
       this.stadiumManager.selectedGlow = glowHelper;
       
-      console.log(`🟠 Orange outline updated for ${selectedObject.type}`);
+      logger.debug(`🟠 Orange outline updated for ${selectedObject.type}`);
     }
   }
 

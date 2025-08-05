@@ -1,5 +1,6 @@
 // src/ManualCameraController.js
 import { THREE } from './three.js';
+import * as logger from './utils/logger.js';
 
 export class ManualCameraController {
   constructor(camera, gameStateManager) {
@@ -61,7 +62,7 @@ export class ManualCameraController {
   validateCameraState() {
     // Zkontroluj pozici kamery
     if (!this.camera.position || isNaN(this.camera.position.x) || isNaN(this.camera.position.y) || isNaN(this.camera.position.z)) {
-      console.warn("Invalid camera position detected, resetting to default");
+      logger.warn("Invalid camera position detected, resetting to default");
       this.camera.position.set(this.defaultPosition.x, this.defaultPosition.y, this.defaultPosition.z);
     }
     
@@ -108,7 +109,7 @@ export class ManualCameraController {
     if (event.code === 'KeyC') {
       setManualCameraMode(!manualCameraMode);
       event.preventDefault();
-      console.log(`Ruční ovládání kamery: ${!manualCameraMode ? 'ZAPNUTO' : 'VYPNUTO'}`);
+      logger.info(`Ruční ovládání kamery: ${!manualCameraMode ? 'ZAPNUTO' : 'VYPNUTO'}`);
       return;
     }
     
@@ -116,14 +117,14 @@ export class ManualCameraController {
     if (!manualCameraMode) return;
     
     // Debug log pro detekci problému
-    console.log(`Manual camera key pressed: ${event.code}`);
+    logger.debug(`Manual camera key pressed: ${event.code}`);
     
     // Šipky pro pohyb
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.code)) {
       // Pokud klávesa není již držená, začni měřit čas
       if (!this.pressedKeys.has(event.code)) {
         this.keyPressTime.set(event.code, Date.now());
-        console.log(`Started tracking ${event.code} at ${Date.now()}`);
+        logger.debug(`Started tracking ${event.code} at ${Date.now()}`);
       }
       this.pressedKeys.add(event.code);
       event.preventDefault();
@@ -140,7 +141,7 @@ export class ManualCameraController {
       }
       this.keyRepeatBlocked.add(event.code);
       
-      console.log("Zoom IN pressed");
+      logger.debug("Zoom IN pressed");
       this.zoomCamera(this.keyZoomSpeed);
       event.preventDefault();
       return;
@@ -154,7 +155,7 @@ export class ManualCameraController {
       }
       this.keyRepeatBlocked.add(event.code);
       
-      console.log("Zoom OUT pressed");
+      logger.debug("Zoom OUT pressed");
       this.zoomCamera(-this.keyZoomSpeed);
       event.preventDefault();
       return;
@@ -162,7 +163,7 @@ export class ManualCameraController {
     
     // R pro reset
     if (event.code === 'KeyR') {
-      console.log("Reset camera pressed");
+      logger.debug("Reset camera pressed");
       this.resetCamera();
       event.preventDefault();
       return;
@@ -176,20 +177,20 @@ export class ManualCameraController {
     if (gameState !== 'editor' || !manualCameraMode) return;
     
     // Debug log
-    console.log(`Manual camera key released: ${event.code}`);
+    logger.debug(`Manual camera key released: ${event.code}`);
     
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.code)) {
       this.pressedKeys.delete(event.code);
       // Vymaž čas držení klávesy
       this.keyPressTime.delete(event.code);
-      console.log(`Stopped tracking ${event.code}`);
+      logger.debug(`Stopped tracking ${event.code}`);
       event.preventDefault();
     }
     
     // Odblokuj zoom klávesy při puštění
     if (['Equal', 'NumpadAdd', 'Minus', 'NumpadSubtract'].includes(event.code)) {
       this.keyRepeatBlocked.delete(event.code);
-      console.log(`Unblocked key repeat for ${event.code}`);
+      logger.debug(`Unblocked key repeat for ${event.code}`);
       event.preventDefault();
     }
   }
@@ -201,7 +202,7 @@ export class ManualCameraController {
     if (gameState !== 'editor' || !manualCameraMode) return;
     
     // Debug log
-    console.log("Mouse wheel zoom:", event.deltaY);
+    logger.debug("Mouse wheel zoom:", event.deltaY);
     
     // Zoom kolečkem myši
     const zoomDelta = event.deltaY > 0 ? -this.zoomSpeed : this.zoomSpeed;
@@ -321,17 +322,17 @@ export class ManualCameraController {
     // Time-based throttling
     const currentTime = Date.now();
     if (currentTime - this.lastZoomTime < this.zoomThrottleMs) {
-      console.log("Zoom throttled");
+      logger.debug("Zoom throttled");
       return;
     }
     this.lastZoomTime = currentTime;
     
     // Debug log pro sledování zoom volání
-    console.log(`zoomCamera called with delta: ${zoomDelta}, current zoom: ${this.currentZoom}`);
+    logger.debug(`zoomCamera called with delta: ${zoomDelta}, current zoom: ${this.currentZoom}`);
     
     // Bezpečnostní kontrola delta
     if (!zoomDelta || isNaN(zoomDelta) || Math.abs(zoomDelta) > 1.0) {
-      console.warn("Invalid zoom delta:", zoomDelta);
+      logger.warn("Invalid zoom delta:", zoomDelta);
       return;
     }
     
@@ -349,12 +350,12 @@ export class ManualCameraController {
     this.camera.fov = Math.max(10, Math.min(120, newFOV));
     this.camera.updateProjectionMatrix();
     
-    console.log(`Camera zoom: ${this.currentZoom.toFixed(2)}x (FOV: ${this.camera.fov.toFixed(1)}°)`);
+    logger.debug(`Camera zoom: ${this.currentZoom.toFixed(2)}x (FOV: ${this.camera.fov.toFixed(1)}°)`);
   }
 
   // Reset kamery na výchozí pozici
   resetCamera() {
-    console.log("Resetuji kameru...");
+    logger.debug("Resetuji kameru...");
     
     // Vynucený reset pozice
     this.camera.position.set(
@@ -393,7 +394,7 @@ export class ManualCameraController {
     // Validace po resetu
     this.validateCameraState();
     
-    console.log("Kamera resetována:", {
+    logger.debug("Kamera resetována:", {
       position: this.camera.position,
       lookAt: this.currentLookAt,
       zoom: this.currentZoom,
@@ -404,18 +405,18 @@ export class ManualCameraController {
   // Zapnutí/vypnutí ruční kamery
   setManualMode(enabled) {
     if (enabled) {
-      console.log("Ruční ovládání kamery ZAPNUTO");
-      console.log("Ovládání:");
-      console.log("  ↑↓←→ = pohyb kamery");
-      console.log("  Tažení myší = změna směru pohledu");
-      console.log("  Kolečko/+/- = zoom");
-      console.log("  R = reset");
-      console.log("  C = vypnout");
+      logger.debug("Ruční ovládání kamery ZAPNUTO");
+      logger.debug("Ovládání:");
+      logger.debug("  ↑↓←→ = pohyb kamery");
+      logger.debug("  Tažení myší = změna směru pohledu");
+      logger.debug("  Kolečko/+/- = zoom");
+      logger.debug("  R = reset");
+      logger.debug("  C = vypnout");
       
       // Nastav kurzor aby indikoval možnost tažení
       document.body.style.cursor = 'grab';
     } else {
-      console.log("Ruční ovládání kamery VYPNUTO");
+      logger.debug("Ruční ovládání kamery VYPNUTO");
       // Vymaž stisknuté klávesy a časy
       this.pressedKeys.clear();
       this.keyPressTime.clear();

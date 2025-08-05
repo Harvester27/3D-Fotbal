@@ -1,5 +1,6 @@
 // src/StadiumManager/StadiumManagerPreview.js - 🎯 PREVIEW SYSTEM
 import { THREE } from '../three.js';
+import * as logger from '../utils/logger.js';
 import { StadiumBuilder } from '../StadiumBuilder.js';
 
 export class StadiumManagerPreview {
@@ -66,7 +67,7 @@ export class StadiumManagerPreview {
     // Aplikuj rotaci přímo na Three.js objekt
     this.stadiumManager.previewObject.rotation.y = this.stadiumManager.previewRotation;
     
-    console.log(`Preview rotace: ${(this.stadiumManager.previewRotation * 180 / Math.PI).toFixed(0)}°`);
+    logger.debug(`Preview rotace: ${(this.stadiumManager.previewRotation * 180 / Math.PI).toFixed(0)}°`);
     
     return this.stadiumManager.previewRotation;
   }
@@ -122,7 +123,7 @@ export class StadiumManagerPreview {
         const valid = this.stadiumManager.validation.isValidPosition(intersection, stadiumElements, toolType);
         this.updatePreviewColor(newPreviewObj, valid);
         
-        console.log(`🎨 Terrain brush preview created: ${toolType} at (${intersection.x}, ${intersection.z}), current: ${currentHeight}m, change: ${heightChange}m`);
+        logger.debug(`🎨 Terrain brush preview created: ${toolType} at (${intersection.x}, ${intersection.z}), current: ${currentHeight}m, change: ${heightChange}m`);
         return { 
           position: intersection.clone(), 
           isValid: valid,
@@ -144,7 +145,7 @@ export class StadiumManagerPreview {
           const valid = this.stadiumManager.validation.isValidPosition(intersection, stadiumElements, toolType);
           this.updatePreviewColor(newPreviewObj, valid);
           
-          console.log(`Preview objekt vytvořen na pozici myši: ${toolType} (grid: ${gridSize}m)`);
+          logger.debug(`Preview objekt vytvořen na pozici myši: ${toolType} (grid: ${gridSize}m)`);
           return { position: intersection.clone(), isValid: valid };
         }
       }
@@ -277,7 +278,7 @@ export class StadiumManagerPreview {
         previousHeight: currentHeight
       };
       
-      console.log(`🎨 Terrain brush applied: ${selectedTool} at (${actualPosition.x.toFixed(1)}, ${actualPosition.z.toFixed(1)}) - Height: ${currentHeight.toFixed(1)}m → ${newHeight.toFixed(1)}m`);
+      logger.debug(`🎨 Terrain brush applied: ${selectedTool} at (${actualPosition.x.toFixed(1)}, ${actualPosition.z.toFixed(1)}) - Height: ${currentHeight.toFixed(1)}m → ${newHeight.toFixed(1)}m`);
       return newElement;
       
     } else {
@@ -300,7 +301,7 @@ export class StadiumManagerPreview {
           mesh: element
         };
         
-        console.log(`Postaveno: ${selectedTool} na pozici (${actualPosition.x.toFixed(1)}, ${actualPosition.z.toFixed(1)}) s rotací ${(this.stadiumManager.previewRotation * 180 / Math.PI).toFixed(0)}°`);
+        logger.debug(`Postaveno: ${selectedTool} na pozici (${actualPosition.x.toFixed(1)}, ${actualPosition.z.toFixed(1)}) s rotací ${(this.stadiumManager.previewRotation * 180 / Math.PI).toFixed(0)}°`);
         return newElement;
       }
     }

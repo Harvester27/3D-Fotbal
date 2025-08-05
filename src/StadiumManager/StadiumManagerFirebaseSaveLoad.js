@@ -1,5 +1,6 @@
 // src/StadiumManager/StadiumManagerFirebaseSaveLoad.js - 🔥 Firebase Save/Load System
 import { StadiumBuilder } from '../StadiumBuilder.js';
+import * as logger from '../utils/logger.js';
 
 export class StadiumManagerFirebaseSaveLoad {
   constructor(stadiumManager) {
@@ -17,10 +18,10 @@ export class StadiumManagerFirebaseSaveLoad {
       const checkFirebase = () => {
         if (window.firebaseManager && window.firebaseManager.getCurrentUser) {
           this.firebaseReady = true;
-          console.log('✅ Firebase ready for stadium saves');
+          logger.debug('✅ Firebase ready for stadium saves');
           resolve();
         } else {
-          console.log('⏳ Waiting for Firebase Manager...');
+          logger.debug('⏳ Waiting for Firebase Manager...');
           setTimeout(checkFirebase, 100);
         }
       };
@@ -35,7 +36,7 @@ export class StadiumManagerFirebaseSaveLoad {
 
   // 💾 SERIALIZACE - Převod stadium elementů na uložitelný formát
   serializeStadiumData(stadiumElements) {
-    console.log(`💾 Serializing ${stadiumElements.length} stadium elements...`);
+    logger.debug(`💾 Serializing ${stadiumElements.length} stadium elements...`);
     
     const serializedElements = stadiumElements.map(element => {
       const serialized = {
@@ -92,7 +93,7 @@ export class StadiumManagerFirebaseSaveLoad {
       }
     };
 
-    console.log(`✅ Serialization complete. Height map entries: ${heightMapData.length}`);
+    logger.debug(`✅ Serialization complete. Height map entries: ${heightMapData.length}`);
     return saveData;
   }
 
@@ -108,7 +109,7 @@ export class StadiumManagerFirebaseSaveLoad {
       if (!this.firebaseReady) await this.waitForFirebase();
       
       if (!this.isUserLoggedIn()) {
-        console.error('❌ Cannot save - user not logged in');
+        logger.error('❌ Cannot save - user not logged in');
         return false;
       }
 
@@ -134,10 +135,10 @@ export class StadiumManagerFirebaseSaveLoad {
         hasTerrainModifications: saveData.metadata.hasTerrainModifications
       });
 
-      console.log(`✅ Stadium saved as "${saveName}" to Firebase`);
+      logger.debug(`✅ Stadium saved as "${saveName}" to Firebase`);
       return true;
     } catch (error) {
-      console.error('❌ Error saving to Firebase:', error);
+      logger.error('❌ Error saving to Firebase:', error);
       return false;
     }
   }
@@ -148,7 +149,7 @@ export class StadiumManagerFirebaseSaveLoad {
       if (!this.firebaseReady) await this.waitForFirebase();
       
       if (!this.isUserLoggedIn()) {
-        console.error('❌ Cannot load - user not logged in');
+        logger.error('❌ Cannot load - user not logged in');
         return null;
       }
 
@@ -160,13 +161,13 @@ export class StadiumManagerFirebaseSaveLoad {
       const saveData = snapshot.val();
       
       if (!saveData) {
-        console.error(`❌ Save "${saveName}" not found`);
+        logger.error(`❌ Save "${saveName}" not found`);
         return null;
       }
 
       return this.deserializeStadiumData(saveData);
     } catch (error) {
-      console.error('❌ Error loading from Firebase:', error);
+      logger.error('❌ Error loading from Firebase:', error);
       return null;
     }
   }
@@ -177,7 +178,7 @@ export class StadiumManagerFirebaseSaveLoad {
       if (!this.firebaseReady) await this.waitForFirebase();
       
       if (!this.isUserLoggedIn()) {
-        console.log('⚠️ User not logged in');
+        logger.debug('⚠️ User not logged in');
         return {};
       }
 
@@ -188,10 +189,10 @@ export class StadiumManagerFirebaseSaveLoad {
       const snapshot = await firebaseManager.database.ref(stadiumListPath).once('value');
       const stadiumList = snapshot.val() || {};
       
-      console.log(`📋 Found ${Object.keys(stadiumList).length} saved stadiums`);
+      logger.debug(`📋 Found ${Object.keys(stadiumList).length} saved stadiums`);
       return stadiumList;
     } catch (error) {
-      console.error('❌ Error reading saves:', error);
+      logger.error('❌ Error reading saves:', error);
       return {};
     }
   }
@@ -202,7 +203,7 @@ export class StadiumManagerFirebaseSaveLoad {
       if (!this.firebaseReady) await this.waitForFirebase();
       
       if (!this.isUserLoggedIn()) {
-        console.error('❌ Cannot delete - user not logged in');
+        logger.error('❌ Cannot delete - user not logged in');
         return false;
       }
 
@@ -217,10 +218,10 @@ export class StadiumManagerFirebaseSaveLoad {
       const stadiumListPath = `users/${userId}/stadiumList/${saveName}`;
       await firebaseManager.database.ref(stadiumListPath).remove();
       
-      console.log(`✅ Save "${saveName}" deleted from Firebase`);
+      logger.debug(`✅ Save "${saveName}" deleted from Firebase`);
       return true;
     } catch (error) {
-      console.error('❌ Error deleting save:', error);
+      logger.error('❌ Error deleting save:', error);
       return false;
     }
   }
@@ -231,7 +232,7 @@ export class StadiumManagerFirebaseSaveLoad {
       if (!this.firebaseReady) await this.waitForFirebase();
       
       if (!this.isUserLoggedIn()) {
-        console.error('❌ Cannot share - user not logged in');
+        logger.error('❌ Cannot share - user not logged in');
         return null;
       }
 
@@ -261,10 +262,10 @@ export class StadiumManagerFirebaseSaveLoad {
       const sharePath = `sharedStadiums/${shareId}`;
       await firebaseManager.database.ref(sharePath).set(sharedStadium);
       
-      console.log(`✅ Stadium shared with ID: ${shareId}`);
+      logger.debug(`✅ Stadium shared with ID: ${shareId}`);
       return shareId;
     } catch (error) {
-      console.error('❌ Error sharing stadium:', error);
+      logger.error('❌ Error sharing stadium:', error);
       return null;
     }
   }
@@ -280,7 +281,7 @@ export class StadiumManagerFirebaseSaveLoad {
       const sharedData = snapshot.val();
       
       if (!sharedData) {
-        console.error(`❌ Shared stadium "${shareId}" not found`);
+        logger.error(`❌ Shared stadium "${shareId}" not found`);
         return null;
       }
 
@@ -289,17 +290,17 @@ export class StadiumManagerFirebaseSaveLoad {
       
       return this.deserializeStadiumData(sharedData);
     } catch (error) {
-      console.error('❌ Error loading shared stadium:', error);
+      logger.error('❌ Error loading shared stadium:', error);
       return null;
     }
   }
 
   // 🔄 DESERIALIZACE - Převod uložených dat zpět na stadium elementy
   deserializeStadiumData(saveData) {
-    console.log(`🔄 Deserializing save data...`);
+    logger.debug(`🔄 Deserializing save data...`);
     
     if (!saveData || !saveData.elements) {
-      console.error('❌ Invalid save data');
+      logger.error('❌ Invalid save data');
       return null;
     }
 
@@ -309,7 +310,7 @@ export class StadiumManagerFirebaseSaveLoad {
       saveData.heightMap.forEach(([key, value]) => {
         this.stadiumManager.heightMap.set(key, value);
       });
-      console.log(`✅ Restored ${saveData.heightMap.length} height map entries`);
+      logger.debug(`✅ Restored ${saveData.heightMap.length} height map entries`);
     }
 
     // 🏗️ Obnov elementy
@@ -352,7 +353,7 @@ export class StadiumManagerFirebaseSaveLoad {
       return element;
     });
 
-    console.log(`✅ Deserialized ${elements.length} elements`);
+    logger.debug(`✅ Deserialized ${elements.length} elements`);
     return {
       elements: elements,
       metadata: saveData.metadata
@@ -362,7 +363,7 @@ export class StadiumManagerFirebaseSaveLoad {
   // 🎮 APLIKOVAT NAČTENÁ DATA DO HRY
   applyLoadedData(loadedData, setStadiumElements) {
     if (!loadedData || !loadedData.elements) {
-      console.error('❌ No data to apply');
+      logger.error('❌ No data to apply');
       return false;
     }
 
@@ -377,12 +378,12 @@ export class StadiumManagerFirebaseSaveLoad {
       // Počkej na další frame a pak vytvoř mesh objekty
       requestAnimationFrame(() => {
         this.stadiumManager.utility.createExistingElements(loadedData.elements);
-        console.log(`✅ Stadium loaded successfully with ${loadedData.elements.length} elements`);
+        logger.debug(`✅ Stadium loaded successfully with ${loadedData.elements.length} elements`);
       });
 
       return true;
     } catch (error) {
-      console.error('❌ Error applying loaded data:', error);
+      logger.error('❌ Error applying loaded data:', error);
       return false;
     }
   }
@@ -418,7 +419,7 @@ export class StadiumManagerFirebaseSaveLoad {
       }
     }
     
-    console.log('❌ No quicksaves found');
+    logger.debug('❌ No quicksaves found');
     return false;
   }
 
@@ -456,10 +457,10 @@ export class StadiumManagerFirebaseSaveLoad {
       
       URL.revokeObjectURL(url);
       
-      console.log(`✅ Stadium exported as ${link.download}`);
+      logger.debug(`✅ Stadium exported as ${link.download}`);
       return true;
     } catch (error) {
-      console.error('❌ Error exporting file:', error);
+      logger.error('❌ Error exporting file:', error);
       return false;
     }
   }
@@ -472,12 +473,12 @@ export class StadiumManagerFirebaseSaveLoad {
       
       // Kontrola verze
       if (saveData.version !== this.SAVE_VERSION) {
-        console.warn(`⚠️ Save version mismatch: ${saveData.version} vs ${this.SAVE_VERSION}`);
+        logger.warn(`⚠️ Save version mismatch: ${saveData.version} vs ${this.SAVE_VERSION}`);
       }
 
       return this.deserializeStadiumData(saveData);
     } catch (error) {
-      console.error('❌ Error importing from file:', error);
+      logger.error('❌ Error importing from file:', error);
       return null;
     }
   }
@@ -504,7 +505,7 @@ export class StadiumManagerFirebaseSaveLoad {
       
       return stadiums.reverse(); // Nejvíc likes první
     } catch (error) {
-      console.error('❌ Error getting top stadiums:', error);
+      logger.error('❌ Error getting top stadiums:', error);
       return [];
     }
   }

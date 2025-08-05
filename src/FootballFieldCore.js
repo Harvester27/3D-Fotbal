@@ -23,6 +23,7 @@ import { playerDataManager } from './PlayerDataManager.js';
 
 // Import MatchManager
 import { matchManager } from './MatchManager.js';
+import * as logger from './utils/logger.js';
 
 export class FootballFieldCore {
   constructor() {
@@ -68,7 +69,7 @@ export class FootballFieldCore {
         userControlled: isUserControlled,
         hasBeenModified: isUserControlled
       };
-      console.log("💾 Camera state saved:", {
+      logger.debug("💾 Camera state saved:", {
         position: this.cameraState.position,
         userControlled: isUserControlled,
         hasBeenModified: this.cameraState.hasBeenModified
@@ -94,7 +95,7 @@ export class FootballFieldCore {
         gameStateManager.setUserControlledCamera(true);
       }
       
-      console.log("🔄 Camera state restored:", {
+      logger.debug("🔄 Camera state restored:", {
         position: savedState.position,
         userControlled: savedState.userControlled
       });
@@ -103,7 +104,7 @@ export class FootballFieldCore {
       setCameraPosition(savedState.position);
       setCameraZoom(75 / savedState.fov);
     } else {
-      console.log("📍 Using default camera position (no user modifications)");
+      logger.debug("📍 Using default camera position (no user modifications)");
     }
   }
 
@@ -112,7 +113,7 @@ export class FootballFieldCore {
     // 🔥 DEBUG: Rozšířený debug helper s goal testing + NET TESTING
     window.debugPlayer = {
       showAttributes: () => {
-        console.log('📊 Current Player Attributes:', {
+        logger.debug('📊 Current Player Attributes:', {
           dataManager: playerDataManager.attributes,
           player: this.player?.attributes,
           calculated: {
@@ -127,26 +128,26 @@ export class FootballFieldCore {
         playerDataManager.attributes[category][attr] = value;
         if (this.player?.refreshAttributes) {
           this.player.refreshAttributes();
-          console.log(`✅ Set ${category}.${attr} = ${value}`);
+          logger.debug(`✅ Set ${category}.${attr} = ${value}`);
         }
       },
       // AI debug commands
       aiStatus: () => {
         if (window.aiController) {
-          console.log('🤖 AI Status:', window.aiController.getStats());
+          logger.debug('🤖 AI Status:', window.aiController.getStats());
         } else {
-          console.log('❌ No AI controller active');
+          logger.warn('❌ No AI controller active');
         }
       },
       aiDebug: (enabled) => {
         if (window.aiController) {
           window.aiController.setDebugMode(enabled);
-          console.log(`🤖 AI Debug mode: ${enabled ? 'ON' : 'OFF'}`);
+          logger.debug(`🤖 AI Debug mode: ${enabled ? 'ON' : 'OFF'}`);
         }
       },
       aiInfo: () => {
         if (window.currentAIOpponent) {
-          console.log('🤖 AI Opponent:', {
+          logger.debug('🤖 AI Opponent:', {
             name: window.currentAIOpponent.name,
             level: window.currentAIOpponent.level,
             overall: window.currentAIOpponent.overallRating,
@@ -157,7 +158,7 @@ export class FootballFieldCore {
       },
       // Match debug commands
       matchStatus: () => {
-        console.log('⚽ Match Status:', matchManager.getCurrentState());
+        logger.debug('⚽ Match Status:', matchManager.getCurrentState());
       },
       matchStart: () => {
         matchManager.startMatch();
@@ -176,7 +177,7 @@ export class FootballFieldCore {
         if (this.ball) {
           this.ball.resetPosition({ x: -19, y: 0.5, z: 0 });
           this.ball.velocity.set(-2, 0, 0); // Rychlost směrem do branky
-          console.log('⚽ Ball positioned in front of LEFT goal (player scores)');
+          logger.debug('⚽ Ball positioned in front of LEFT goal (player scores)');
         }
       },
       
@@ -185,7 +186,7 @@ export class FootballFieldCore {
         if (this.ball) {
           this.ball.resetPosition({ x: 19, y: 0.5, z: 0 });
           this.ball.velocity.set(2, 0, 0); // Rychlost směrem do branky
-          console.log('⚽ Ball positioned in front of RIGHT goal (AI scores)');
+          logger.debug('⚽ Ball positioned in front of RIGHT goal (AI scores)');
         }
       },
       
@@ -194,7 +195,7 @@ export class FootballFieldCore {
         if (this.ball) {
           this.ball.resetPosition({ x: -18, y: 0.5, z: 0 });
           this.ball.velocity.set(-3, 0, -1.5); // Směr na levou tyčku
-          console.log('⚽ Ball shot towards LEFT goal post');
+          logger.debug('⚽ Ball shot towards LEFT goal post');
         }
       },
       
@@ -203,7 +204,7 @@ export class FootballFieldCore {
         if (this.ball) {
           this.ball.resetPosition({ x: -18, y: 0.5, z: 0 });
           this.ball.velocity.set(-2, 1.5, 0); // Směr na břevno
-          console.log('⚽ Ball shot towards crossbar');
+          logger.debug('⚽ Ball shot towards crossbar');
         }
       },
       
@@ -215,7 +216,7 @@ export class FootballFieldCore {
           
           this.ball.resetPosition({ x: 0, y: 0.5, z: 0 });
           this.ball.velocity.set(velocityX, 0.2, Math.random() * 2 - 1);
-          console.log(`🚀 Power shot towards ${direction} goal!`);
+          logger.debug(`🚀 Power shot towards ${direction} goal!`);
         }
       },
       
@@ -230,45 +231,45 @@ export class FootballFieldCore {
       ballReset: () => {
         if (this.ball) {
           this.ball.resetPosition();
-          console.log('🔄 Ball reset to center');
+          logger.debug('🔄 Ball reset to center');
         }
       },
       
       // Test goal detection systému
       testGoalSystem: () => {
-        console.log('🧪 Testing goal system...');
+        logger.debug('🧪 Testing goal system...');
         
         // Test 1: Levá branka
         setTimeout(() => {
-          console.log('Test 1: Ball to left goal');
+          logger.debug('Test 1: Ball to left goal');
           window.debugPlayer.ballToLeftGoal();
         }, 1000);
         
         // Test 2: Pravá branka  
         setTimeout(() => {
-          console.log('Test 2: Ball to right goal');
+          logger.debug('Test 2: Ball to right goal');
           window.debugPlayer.ballToRightGoal();
         }, 4000);
         
         // Test 3: Collision test
         setTimeout(() => {
-          console.log('Test 3: Ball to left post');
+          logger.debug('Test 3: Ball to left post');
           window.debugPlayer.ballToLeftPost();
         }, 7000);
         
         // Test 4: Crossbar test
         setTimeout(() => {
-          console.log('Test 4: Ball to crossbar');
+          logger.debug('Test 4: Ball to crossbar');
           window.debugPlayer.ballToCrossbar();
         }, 10000);
         
-        console.log('⏳ Goal system test sequence started (13 seconds total)');
+        logger.debug('⏳ Goal system test sequence started (13 seconds total)');
       },
       
       // Kompletní goal info
       goalInfo: () => {
         if (this.ball && this.ball.goals) {
-          console.log('🥅 Goal System Info:', {
+          logger.debug('🥅 Goal System Info:', {
             leftGoal: this.ball.goals.left,
             rightGoal: this.ball.goals.right,
             ballPosition: {
@@ -289,7 +290,7 @@ export class FootballFieldCore {
         if (this.ball) {
           this.ball.resetPosition({ x: -19, y: 0.8, z: 0 });
           this.ball.velocity.set(-8, 0, 0); // Fast shot into back net
-          console.log('🕸️ Testing back net collision');
+          logger.debug('🕸️ Testing back net collision');
         }
       },
       
@@ -300,7 +301,7 @@ export class FootballFieldCore {
           const z = side === 'left' ? -2 : -2;
           this.ball.resetPosition({ x: x, y: 0.5, z: z });
           this.ball.velocity.set(0, 0, side === 'left' ? -3 : -3);
-          console.log(`🕸️ Testing ${side} side net collision`);
+          logger.debug(`🕸️ Testing ${side} side net collision`);
         }
       },
       
@@ -309,7 +310,7 @@ export class FootballFieldCore {
         if (this.ball) {
           this.ball.resetPosition({ x: -19, y: 1.8, z: 0 });
           this.ball.velocity.set(-2, -1, 0);
-          console.log('🕸️ Testing top net collision');
+          logger.debug('🕸️ Testing top net collision');
         }
       },
       
@@ -324,9 +325,9 @@ export class FootballFieldCore {
           if (targetNet) {
             const impactPoint = new THREE.Vector3(0, 0.8, 0);
             window.fieldUtils.animateNetWave(targetNet, impactPoint, intensity);
-            console.log(`🌊 Animated ${goalSide} ${netType} net with intensity ${intensity}`);
+            logger.debug(`🌊 Animated ${goalSide} ${netType} net with intensity ${intensity}`);
           } else {
-            console.log(`❌ Net not found: ${goalSide} ${netType}`);
+            logger.warn(`❌ Net not found: ${goalSide} ${netType}`);
           }
         }
       },
@@ -341,7 +342,7 @@ export class FootballFieldCore {
               window.fieldUtils.animateNetWave(net, impactPoint, intensity);
             }, index * 200); // Staggered animation
           });
-          console.log(`🌊 Animated all ${nets.length} nets`);
+          logger.debug(`🌊 Animated all ${nets.length} nets`);
         }
       },
       
@@ -349,7 +350,7 @@ export class FootballFieldCore {
       netInfo: () => {
         if (window.fieldUtils) {
           const nets = window.fieldUtils.getGoalNets();
-          console.log('🕸️ Net System Info:', {
+          logger.debug('🕸️ Net System Info:', {
             totalNets: nets.length,
             nets: nets.map(net => ({
               type: net.userData.netType,
@@ -359,83 +360,83 @@ export class FootballFieldCore {
             }))
           });
         } else {
-          console.log('❌ FieldUtils not available');
+          logger.warn('❌ FieldUtils not available');
         }
       },
       
       // Complete net testing sequence
       testNetSequence: () => {
-        console.log('🧪 Starting complete net testing sequence...');
+        logger.debug('🧪 Starting complete net testing sequence...');
         
         // Test 1: Back net collision
         setTimeout(() => {
-          console.log('Test 1: Back net collision');
+          logger.debug('Test 1: Back net collision');
           window.debugPlayer.testNetCollision();
         }, 1000);
         
         // Test 2: Left side net
         setTimeout(() => {
-          console.log('Test 2: Left side net collision');
+          logger.debug('Test 2: Left side net collision');
           window.debugPlayer.testSideNet('left');
         }, 4000);
         
         // Test 3: Right side net
         setTimeout(() => {
-          console.log('Test 3: Right side net collision');
+          logger.debug('Test 3: Right side net collision');
           window.debugPlayer.testSideNet('right');
         }, 7000);
         
         // Test 4: Top net
         setTimeout(() => {
-          console.log('Test 4: Top net collision');
+          logger.debug('Test 4: Top net collision');
           window.debugPlayer.testTopNet();
         }, 10000);
         
         // Test 5: Manual net animation
         setTimeout(() => {
-          console.log('Test 5: Manual net wave animation');
+          logger.debug('Test 5: Manual net wave animation');
           window.debugPlayer.animateAllNets(0.5);
         }, 13000);
         
-        console.log('⏳ Net testing sequence started (16 seconds total)');
+        logger.debug('⏳ Net testing sequence started (16 seconds total)');
       },
       
       // === STADIUM SAVE COMMANDS ===
       saveStadium: () => {
         const saved = playerDataManager.stadiumManager.saveStadium();
-        console.log(saved ? '✅ Stadium saved!' : '❌ Failed to save stadium');
+        logger.debug(saved ? '✅ Stadium saved!' : '❌ Failed to save stadium');
       },
       
       stadiumInfo: () => {
         const info = playerDataManager.getStadiumInfo();
-        console.log('🏟️ Stadium Info:', info);
-        console.log('💾 Unsaved changes:', info.hasUnsavedChanges);
-        console.log('📦 Elements:', playerDataManager.stadiumManager.mainStadium.elements.length);
+        logger.debug('🏟️ Stadium Info:', info);
+        logger.debug('💾 Unsaved changes:', info.hasUnsavedChanges);
+        logger.debug('📦 Elements:', playerDataManager.stadiumManager.mainStadium.elements.length);
       }
     };
     
-    console.log('💡 Goal Debug Helper loaded! Available commands:');
-    console.log('🎯 window.debugPlayer.ballToLeftGoal() - Test player goal');
-    console.log('🤖 window.debugPlayer.ballToRightGoal() - Test AI goal');  
-    console.log('🏒 window.debugPlayer.ballToLeftPost() - Test post collision');
-    console.log('🎳 window.debugPlayer.ballToCrossbar() - Test crossbar collision');
-    console.log('🚀 window.debugPlayer.ballPowerShot("left") - Power shot test');
-    console.log('📊 window.debugPlayer.ballStatus() - Ball debug info');
-    console.log('🧪 window.debugPlayer.testGoalSystem() - Automated test sequence');
-    console.log('🥅 window.debugPlayer.goalInfo() - Complete goal system info');
+    logger.debug('💡 Goal Debug Helper loaded! Available commands:');
+    logger.debug('🎯 window.debugPlayer.ballToLeftGoal() - Test player goal');
+    logger.debug('🤖 window.debugPlayer.ballToRightGoal() - Test AI goal');  
+    logger.debug('🏒 window.debugPlayer.ballToLeftPost() - Test post collision');
+    logger.debug('🎳 window.debugPlayer.ballToCrossbar() - Test crossbar collision');
+    logger.debug('🚀 window.debugPlayer.ballPowerShot("left") - Power shot test');
+    logger.debug('📊 window.debugPlayer.ballStatus() - Ball debug info');
+    logger.debug('🧪 window.debugPlayer.testGoalSystem() - Automated test sequence');
+    logger.debug('🥅 window.debugPlayer.goalInfo() - Complete goal system info');
     
-    console.log('\n🕸️ Net System Commands:');
-    console.log('🌊 window.debugPlayer.testNetCollision() - Test back net collision');
-    console.log('🌊 window.debugPlayer.testSideNet("left") - Test side net collision');  
-    console.log('🌊 window.debugPlayer.testTopNet() - Test top net collision');
-    console.log('🌊 window.debugPlayer.animateNet("left", "back", 0.5) - Manual net animation');
-    console.log('🌊 window.debugPlayer.animateAllNets(0.3) - Animate all nets');
-    console.log('🕸️ window.debugPlayer.netInfo() - Net system info');
-    console.log('🧪 window.debugPlayer.testNetSequence() - Complete net testing sequence');
+    logger.debug('\n🕸️ Net System Commands:');
+    logger.debug('🌊 window.debugPlayer.testNetCollision() - Test back net collision');
+    logger.debug('🌊 window.debugPlayer.testSideNet("left") - Test side net collision');  
+    logger.debug('🌊 window.debugPlayer.testTopNet() - Test top net collision');
+    logger.debug('🌊 window.debugPlayer.animateNet("left", "back", 0.5) - Manual net animation');
+    logger.debug('🌊 window.debugPlayer.animateAllNets(0.3) - Animate all nets');
+    logger.debug('🕸️ window.debugPlayer.netInfo() - Net system info');
+    logger.debug('🧪 window.debugPlayer.testNetSequence() - Complete net testing sequence');
     
-    console.log('\n💾 Stadium Commands:');
-    console.log('💾 window.debugPlayer.saveStadium() - Manually save stadium');
-    console.log('🏟️ window.debugPlayer.stadiumInfo() - Stadium info and unsaved changes');
+    logger.debug('\n💾 Stadium Commands:');
+    logger.debug('💾 window.debugPlayer.saveStadium() - Manually save stadium');
+    logger.debug('🏟️ window.debugPlayer.stadiumInfo() - Stadium info and unsaved changes');
   }
 
   // Create and initialize the football field
@@ -448,7 +449,7 @@ export class FootballFieldCore {
     
     if (!mountRef.current || (gameState !== 'playing' && gameState !== 'editor')) return null;
 
-    console.log("🚀 Core field initialization - saving camera state first");
+    logger.info("🚀 Core field initialization - saving camera state first");
 
     // SAVE camera state BEFORE cleanup (pokud existuje)
     if (this.sceneSetup?.camera && this.gameStateManager) {
@@ -527,28 +528,28 @@ export class FootballFieldCore {
           if (value) {
             // User just took control - mark as modified
             this.cameraState.hasBeenModified = true;
-            console.log("🎮 User took control - marking camera as modified");
+            logger.debug("🎮 User took control - marking camera as modified");
           }
         };
       } else {
-        console.log('⚠️ gameStateManager.setUserControlledCamera method not found');
+        logger.warn('⚠️ gameStateManager.setUserControlledCamera method not found');
       }
       
       // 🏟️ OPRAVENO: Načti hlavní stadion hráče
-      console.log('🏟️ Loading player\'s main stadium...');
+      logger.debug('🏟️ Loading player\'s main stadium...');
       playerDataManager.loadMainStadium().then(loadedElements => {
         if (loadedElements && loadedElements.length > 0) {
-          console.log(`✅ Loaded ${loadedElements.length} stadium elements from Firebase`);
+          logger.debug(`✅ Loaded ${loadedElements.length} stadium elements from Firebase`);
           stateSetters.setStadiumElements(loadedElements);
           
           // Vytvoř 3D objekty pro načtené elementy
           this.stadiumManager.createExistingElements(loadedElements);
         } else {
-          console.log('🆕 Starting with empty stadium');
+          logger.debug('🆕 Starting with empty stadium');
           // Nic nedělej - začni s prázdným stadionem
         }
       }).catch(error => {
-        console.error('❌ Failed to load stadium:', error);
+        logger.error('❌ Failed to load stadium:', error);
       });
     }
     
@@ -573,18 +574,18 @@ export class FootballFieldCore {
       
       // Nastav globální referenci pro preview!
       window.playerRef = playerRef;
-      console.log('✅ Global playerRef set for preview synchronization');
+      logger.debug('✅ Global playerRef set for preview synchronization');
       
       // OKAMŽITĚ REFRESH VZHLED podle PlayerDataManager
       if (this.player.refreshAppearance) {
         this.player.refreshAppearance();
-        console.log('✅ Player appearance synced with PlayerDataManager on creation');
+        logger.debug('✅ Player appearance synced with PlayerDataManager on creation');
       }
       
       // OKAMŽITĚ REFRESH ATRIBUTY podle PlayerDataManager
       if (this.player.refreshAttributes) {
         this.player.refreshAttributes();
-        console.log('✅ Player attributes synced with PlayerDataManager on creation');
+        logger.debug('✅ Player attributes synced with PlayerDataManager on creation');
       }
       
       // Nastav viditelnost hlavy podle počátečního pohledu
@@ -592,11 +593,11 @@ export class FootballFieldCore {
         this.player.setHeadVisible(!isFirstPerson);
       }
       
-      console.log("✅ Player created with custom appearance AND attributes from PlayerDataManager");
+      logger.debug("✅ Player created with custom appearance AND attributes from PlayerDataManager");
       
       // Pokud je offline match, vytvoř AI hráče
       if (currentAIOpponent) {
-        console.log("🤖 Creating AI player:", currentAIOpponent.name);
+        logger.debug("🤖 Creating AI player:", currentAIOpponent.name);
         
         // Vytvoř AI hráče pomocí stejné třídy FootballPlayer
         this.aiPlayer = new FootballPlayer(scene, { x: 0, y: 0, z: -8 }, true); // true = isAI
@@ -628,7 +629,7 @@ export class FootballFieldCore {
         // Globální reference pro debugging
         window.aiPlayerRef = this.aiPlayer;
         
-        console.log("✅ AI player created with OVR:", this.aiPlayer.getOverallRating());
+        logger.debug("✅ AI player created with OVR:", this.aiPlayer.getOverallRating());
         
         // Vytvoř AI Controller
         this.aiController = new AIController(
@@ -641,7 +642,7 @@ export class FootballFieldCore {
         
         window.aiController = this.aiController; // Pro debugging
         
-        console.log("🎮 AI Controller created for:", currentAIOpponent.name);
+        logger.debug("🎮 AI Controller created for:", currentAIOpponent.name);
         
         // Volitelně: Zapni debug mode pro vývoj
         if (process.env.NODE_ENV === 'development') {
@@ -675,7 +676,7 @@ export class FootballFieldCore {
       this.animationManager.addUpdateCallback('netAnimations', (deltaTime) => {
         window.fieldUtils.updateNetAnimations(deltaTime);
       });
-      console.log('✅ Net animations registered with AnimationManager');
+      logger.debug('✅ Net animations registered with AnimationManager');
     }
     
     this.animationManager.start();
@@ -731,7 +732,7 @@ export class FootballFieldCore {
 
   // Cleanup all resources
   dispose() {
-    console.log("🧹 Core cleanup started");
+    logger.info("🧹 Core cleanup started");
 
     // SAVE camera state BEFORE cleanup
     if (this.sceneSetup?.camera && this.gameStateManager) {
@@ -767,7 +768,7 @@ export class FootballFieldCore {
       // Vyčisti globální referenci
       if (window.playerRef) {
         window.playerRef = null;
-        console.log('🧹 Global playerRef cleaned up');
+        logger.debug('🧹 Global playerRef cleaned up');
       }
     }
     if (this.ball) {
@@ -782,7 +783,7 @@ export class FootballFieldCore {
     }
     if (window.aiPlayerRef) {
       window.aiPlayerRef = null;
-      console.log('🧹 AI player cleaned up');
+      logger.debug('🧹 AI player cleaned up');
     }
     
     // Cleanup AI controller
@@ -791,13 +792,13 @@ export class FootballFieldCore {
     }
     if (window.aiController) {
       window.aiController = null;
-      console.log('🧹 AI Controller cleaned up');
+      logger.debug('🧹 AI Controller cleaned up');
     }
     
     // 🔥 NOVÉ: Cleanup FieldUtils reference
     if (window.fieldUtils) {
       window.fieldUtils = null;
-      console.log('🧹 FieldUtils reference cleaned up');
+      logger.debug('🧹 FieldUtils reference cleaned up');
     }
     
     // Cleanup debug helper
@@ -829,6 +830,6 @@ export class FootballFieldCore {
     this.cameraController = null;
     this.gameStateManager = null;
 
-    console.log("✅ Core cleanup completed");
+    logger.info("✅ Core cleanup completed");
   }
 }

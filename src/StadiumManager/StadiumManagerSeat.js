@@ -1,5 +1,6 @@
 // src/StadiumManager/StadiumManagerSeat.js - 🪑 SEAT MANAGEMENT SYSTEM
 import { THREE } from '../three.js';
+import * as logger from '../utils/logger.js';
 import { StadiumBuilder } from '../StadiumBuilder.js';
 
 export class StadiumManagerSeat {
@@ -30,7 +31,7 @@ export class StadiumManagerSeat {
 
   // 🪑 Vytvoření preview sedačky
   createSeatPreview(seatType, seatColor) {
-    console.log(`🪑 Creating seat preview: ${seatType}, ${seatColor}`);
+    logger.debug(`🪑 Creating seat preview: ${seatType}, ${seatColor}`);
     
     const previewSeat = StadiumBuilder.createElement('individual_seat', { x: 0, y: 0, z: 0 }, {
       seatType: seatType,
@@ -39,7 +40,7 @@ export class StadiumManagerSeat {
     });
     
     if (!previewSeat) {
-      console.error('❌ Failed to create seat preview');
+      logger.error('❌ Failed to create seat preview');
       return null;
     }
     
@@ -61,7 +62,7 @@ export class StadiumManagerSeat {
       }
     });
     
-    console.log(`✅ Seat preview created successfully`);
+    logger.debug(`✅ Seat preview created successfully`);
     return previewSeat;
   }
 
@@ -91,7 +92,7 @@ export class StadiumManagerSeat {
 
   // 🪑 Vytvoření/aktualizace preview sedaček na pozici myši (MULTIPLE PREVIEW)
   updateSeatPreviewAtMousePosition(mouseScreen, camera, selectedStairs, seatOptions, stadiumElements) {
-    console.log(`🪑 Updating seat preview at mouse position`, { 
+    logger.debug(`🪑 Updating seat preview at mouse position`, { 
       placementMode: seatOptions.placementMode,
       seatType: seatOptions.type,
       seatColor: seatOptions.color
@@ -140,7 +141,7 @@ export class StadiumManagerSeat {
           !this.isPositionOccupied(pos.position, stadiumElements || [])
         );
         
-        console.log(`🪑 Preview positions: ${previewPositions.length} total, ${availablePositions.length} available`);
+        logger.debug(`🪑 Preview positions: ${previewPositions.length} total, ${availablePositions.length} available`);
         
         // Pokud se změnily options nebo počet pozic, vytvoř nové preview
         if (!this.stadiumManager.seatPreviewObjects.length || 
@@ -165,7 +166,7 @@ export class StadiumManagerSeat {
           this.stadiumManager.lastSeatColor = seatOptions.color;
           this.stadiumManager.lastPreviewCount = availablePositions.length;
           
-          console.log(`🪑 Created ${this.stadiumManager.seatPreviewObjects.length} preview seats for ${seatOptions.placementMode} mode`);
+          logger.debug(`🪑 Created ${this.stadiumManager.seatPreviewObjects.length} preview seats for ${seatOptions.placementMode} mode`);
         } else {
           // Jen aktualizuj pozice existujících preview objektů
           availablePositions.forEach((seatPos, index) => {
@@ -236,19 +237,19 @@ export class StadiumManagerSeat {
     this.stadiumManager.lastPreviewCount = 0;
     
     if (this.stadiumManager.seatPreviewObjects.length === 0) {
-      console.log(`🧹 All seat previews cleared`);
+      logger.debug(`🧹 All seat previews cleared`);
     }
   }
 
   // 🔥 Přidání sedaček na schody s POKROČILOU LOGIKOU pro všechny módy
   addSeatsToStairs(targetStairs, intersectionPoint, seatOptions, stadiumElements, setStadiumElements, seatPrice = null) {
-    console.log(`🔥🔥🔥 addSeatsToStairs ENTRY POINT:`);
-    console.log(`🔥 targetStairs:`, targetStairs?.id || 'null');
-    console.log(`🔥 seatOptions RAW:`, seatOptions);
-    console.log(`🔥 seatOptions.type = "${seatOptions?.type}", seatOptions.color = "${seatOptions?.color}", placementMode = "${seatOptions?.placementMode}"`);
+    logger.debug(`🔥🔥🔥 addSeatsToStairs ENTRY POINT:`);
+    logger.debug(`🔥 targetStairs:`, targetStairs?.id || 'null');
+    logger.debug(`🔥 seatOptions RAW:`, seatOptions);
+    logger.debug(`🔥 seatOptions.type = "${seatOptions?.type}", seatOptions.color = "${seatOptions?.color}", placementMode = "${seatOptions?.placementMode}"`);
     
     const { placementMode, type, color } = seatOptions;
-    console.log(`🪑 Destructured options: placementMode=${placementMode}, type=${type}, color=${color}`);
+    logger.debug(`🪑 Destructured options: placementMode=${placementMode}, type=${type}, color=${color}`);
     
     let seatsToAdd = [];
     
@@ -258,9 +259,9 @@ export class StadiumManagerSeat {
         const nearestSeatPos = StadiumBuilder.findNearestSeatPosition(intersectionPoint, targetStairs);
         if (nearestSeatPos && !this.isPositionOccupied(nearestSeatPos.position, stadiumElements)) {
           seatsToAdd = [nearestSeatPos];
-          console.log(`🪑 Single mode: Adding 1 seat at step ${nearestSeatPos.stepIndex}`);
+          logger.debug(`🪑 Single mode: Adding 1 seat at step ${nearestSeatPos.stepIndex}`);
         } else {
-          console.log(`🪑 Single mode: Position occupied or invalid`);
+          logger.debug(`🪑 Single mode: Position occupied or invalid`);
         }
         break;
         
@@ -274,7 +275,7 @@ export class StadiumManagerSeat {
           // Vyfiltruj pozice kde už sedačky jsou
           seatsToAdd = rowPositions.filter(pos => !this.isPositionOccupied(pos.position, stadiumElements));
           
-          console.log(`🪑 Row mode: Step ${targetSeatPos.stepIndex} - ${rowPositions.length} total positions, ${seatsToAdd.length} available`);
+          logger.debug(`🪑 Row mode: Step ${targetSeatPos.stepIndex} - ${rowPositions.length} total positions, ${seatsToAdd.length} available`);
         }
         break;
         
@@ -285,20 +286,20 @@ export class StadiumManagerSeat {
         // Vyfiltruj pozice kde už sedačky jsou
         seatsToAdd = allPositions.filter(pos => !this.isPositionOccupied(pos.position, stadiumElements));
         
-        console.log(`🪑 All mode: ${allPositions.length} total positions, ${seatsToAdd.length} available`);
+        logger.debug(`🪑 All mode: ${allPositions.length} total positions, ${seatsToAdd.length} available`);
         break;
         
       default:
-        console.error(`❌ Unknown placement mode: ${placementMode}`);
+        logger.error(`❌ Unknown placement mode: ${placementMode}`);
         return;
     }
     
     if (seatsToAdd.length === 0) {
-      console.log(`🪑 No seats to add - all positions occupied or invalid`);
+      logger.debug(`🪑 No seats to add - all positions occupied or invalid`);
       return;
     }
     
-    console.log(`🪑 Creating ${seatsToAdd.length} seats with type=${type}, color=${color}`);
+    logger.debug(`🪑 Creating ${seatsToAdd.length} seats with type=${type}, color=${color}`);
     
     // Vytvoř všechny sedačky
     const newSeats = [];
@@ -333,7 +334,7 @@ export class StadiumManagerSeat {
     // Přidej všechny nové sedačky do state najednou
     if (newSeats.length > 0) {
       setStadiumElements(prev => [...prev, ...newSeats]);
-      console.log(`✅ Added ${newSeats.length} ${type} (${color}) seats in ${placementMode} mode`);
+      logger.debug(`✅ Added ${newSeats.length} ${type} (${color}) seats in ${placementMode} mode`);
     }
   }
 }
