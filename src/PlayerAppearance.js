@@ -34,23 +34,52 @@ export class PlayerAppearance {
     
     // TĚLO - realističtější proporce s detaily
     const torsoGroup = new THREE.Group();
-    
-    // Hlavní torso s realistickými proporcemi
-    const torsoGeometry = new THREE.CylinderGeometry(0.28, 0.24, 0.8, 32, 16);
-    torsoGeometry.scale(1.3, 1, 0.8);
-    const torso = new THREE.Mesh(
-      torsoGeometry,
-      new THREE.MeshStandardMaterial({
-        color: jerseyColor,
-        roughness: 0.7,
-        metalness: 0.05,
-        flatShading: false
-      })
-    );
-    torso.position.y = 0.9;
-    torso.castShadow = true;
-    torsoGroup.add(torso);
-    
+
+    // Textura dresu se zvýrazněním
+    const jerseyCanvas = document.createElement('canvas');
+    jerseyCanvas.width = 512;
+    jerseyCanvas.height = 512;
+    const jctx = jerseyCanvas.getContext('2d');
+    jctx.fillStyle = `#${jerseyColor.toString(16).padStart(6, '0')}`;
+    jctx.fillRect(0, 0, 512, 512);
+    jctx.fillStyle = `#${accentColor.toString(16).padStart(6, '0')}`;
+    jctx.fillRect(0, 220, 512, 70);
+    const jerseyTexture = new THREE.CanvasTexture(jerseyCanvas);
+
+    const jerseyMaterial = new THREE.MeshStandardMaterial({
+      map: jerseyTexture,
+      roughness: 0.7,
+      metalness: 0.05,
+      flatShading: false
+    });
+
+    // Horní část trupu (hrudník)
+    const chestGeometry = new THREE.CylinderGeometry(0.32, 0.26, 0.45, 32, 16);
+    chestGeometry.scale(1.3, 1, 0.8);
+    const chest = new THREE.Mesh(chestGeometry, jerseyMaterial);
+    chest.position.y = 1.075;
+    chest.castShadow = true;
+    torsoGroup.add(chest);
+
+    // Spodní část trupu (boky)
+    const hipsGeometry = new THREE.CylinderGeometry(0.26, 0.28, 0.35, 32, 16);
+    hipsGeometry.scale(1.3, 1, 0.8);
+    const hips = new THREE.Mesh(hipsGeometry, jerseyMaterial);
+    hips.position.y = 0.675;
+    hips.castShadow = true;
+    torsoGroup.add(hips);
+
+    // Ramena pro hladší přechod k rukám
+    for (let side of [-1, 1]) {
+      const shoulder = new THREE.Mesh(
+        new THREE.SphereGeometry(0.16, 16, 12),
+        jerseyMaterial
+      );
+      shoulder.position.set(side * 0.35, 1.25, 0);
+      shoulder.scale.set(1.2, 0.6, 1.2);
+      torsoGroup.add(shoulder);
+    }
+
     // Přidáme jemné detaily - záhyby na dresu
     const wrinkle1 = new THREE.Mesh(
       new THREE.TorusGeometry(0.32, 0.01, 4, 32),
@@ -59,7 +88,7 @@ export class PlayerAppearance {
         roughness: 0.8
       })
     );
-    wrinkle1.position.set(0, 0.7, 0);
+    wrinkle1.position.set(0, 0.9, 0);
     wrinkle1.rotation.x = Math.PI / 2;
     wrinkle1.scale.set(1, 0.7, 1);
     torsoGroup.add(wrinkle1);
@@ -83,7 +112,7 @@ export class PlayerAppearance {
         opacity: 0.9
       })
     );
-    symbol.position.set(0, 0.9, 0.23);
+    symbol.position.set(0, 1.05, 0.23);
     torsoGroup.add(symbol);
     
     // Číslo na zádech
@@ -105,7 +134,7 @@ export class PlayerAppearance {
         transparent: true
       })
     );
-    number.position.set(0, 0.9, -0.21);
+    number.position.set(0, 1.05, -0.21);
     number.rotation.y = Math.PI;
     torsoGroup.add(number);
     
@@ -128,7 +157,7 @@ export class PlayerAppearance {
           transparent: true
         })
       );
-      nameTag.position.set(0, 1.15, -0.21);
+      nameTag.position.set(0, 1.25, -0.21);
       nameTag.rotation.y = Math.PI;
       torsoGroup.add(nameTag);
     }
