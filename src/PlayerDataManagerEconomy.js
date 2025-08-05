@@ -235,7 +235,18 @@ export class PlayerEconomyManager {
       this.virtualCoins = data.virtualCoins ?? this.virtualCoins;
       this.premiumGems = data.premiumGems ?? this.premiumGems;
       this.realMoneyBalance = data.realMoneyBalance ?? this.realMoneyBalance;
-      this.dailyRewards = { ...this.dailyRewards, ...data.dailyRewards };
+      if (data.dailyRewards) {
+        const localLast = this.dailyRewards.lastClaim ? new Date(this.dailyRewards.lastClaim) : null;
+        const remoteLast = data.dailyRewards.lastClaim ? new Date(data.dailyRewards.lastClaim) : null;
+
+        // Ponech si novější záznam - nevracej se k starším odměnám
+        if (remoteLast && (!localLast || remoteLast > localLast)) {
+          this.dailyRewards = { ...this.dailyRewards, ...data.dailyRewards };
+        } else {
+          this.dailyRewards = { ...data.dailyRewards, ...this.dailyRewards };
+        }
+      }
+
       // Aktualizuj localStorage, aby se data zachovala mezi relacemi
       if (typeof window !== 'undefined') {
         localStorage.setItem('dailyRewards', JSON.stringify(this.dailyRewards));
