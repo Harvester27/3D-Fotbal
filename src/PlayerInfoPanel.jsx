@@ -185,7 +185,7 @@ export const PlayerInfoPanel = ({ onCustomizeClick }) => {
     const updateData = () => {
       setPlayerData(playerDataManager.getPlayerSummary());
       setMoneyFormat(playerDataManager.getFormattedMoney());
-      
+
       setPlayerRatings({
         overall: playerDataManager.getOverallRating(),
         position: playerDataManager.getPositionRating('CAM'),
@@ -196,6 +196,9 @@ export const PlayerInfoPanel = ({ onCustomizeClick }) => {
         focus: playerDataManager.training.focus,
         coachLevel: playerDataManager.training.coachLevel
       });
+
+      // Po načtení dat znovu ověř denní odměnu
+      checkDailyReward();
     };
 
     playerDataManager.addEventListener('coinsChanged', updateData);
