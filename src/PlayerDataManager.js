@@ -7,6 +7,7 @@ import { PlayerFirebaseManager } from './PlayerDataManagerFirebase.js';
 import { PlayerProfileManager } from './PlayerDataManagerProfile.js';
 import { PlayerEventsManager } from './PlayerDataManagerEvents.js';
 import { PlayerStadiumManager } from './PlayerDataManagerStadium.js';
+import * as logger from './utils/logger.js';
 
 export class PlayerDataManager {
   constructor() {
@@ -15,7 +16,7 @@ export class PlayerDataManager {
       return PlayerDataManager.instance;
     }
     
-    console.log('🚀 Initializing PlayerDataManager v3.0 (Modular)...');
+    logger.info('🚀 Initializing PlayerDataManager v3.0 (Modular)...');
     
     // 🔔 Nejdříve event systém (ostatní managery ho potřebují)
     this.events = new PlayerEventsManager(this);
@@ -49,7 +50,7 @@ export class PlayerDataManager {
     // Inicializuj Firebase až po vytvoření všech managerů
     this.initializeFirebase();
     
-    console.log('✅ PlayerDataManager v3.0 initialized');
+    logger.info('✅ PlayerDataManager v3.0 initialized');
   }
   
   // Nastav cross-odkazy pro backward compatibility
@@ -132,7 +133,7 @@ export class PlayerDataManager {
     try {
       await this.firebaseManager.initialize();
     } catch (error) {
-      console.error('❌ Failed to initialize Firebase:', error);
+      logger.error('❌ Failed to initialize Firebase:', error);
     }
   }
   
@@ -281,14 +282,14 @@ export class PlayerDataManager {
         
         this.saveToFirebase();
         this.notifyListeners('dataImported', imported.data);
-        console.log('✅ Data successfully imported');
+        logger.info('✅ Data successfully imported');
         return true;
       } else {
-        console.error('❌ Invalid data format or version');
+        logger.error('❌ Invalid data format or version');
         return false;
       }
     } catch (error) {
-      console.error('❌ Failed to import data:', error);
+      logger.error('❌ Failed to import data:', error);
       return false;
     }
   }
@@ -325,14 +326,14 @@ export class PlayerDataManager {
   
   // 🧹 Cleanup
   dispose() {
-    console.log("🧹 Disposing PlayerDataManager...");
+    logger.info("🧹 Disposing PlayerDataManager...");
     
     // Dispose všech managerů
     this.firebaseManager?.dispose();
     this.events?.dispose();
     this.stadiumManager?.dispose();
     
-    console.log("✅ PlayerDataManager disposed");
+    logger.info("✅ PlayerDataManager disposed");
   }
   
   // 🛠️ Debug metody - kombinuj ze všech managerů
@@ -346,7 +347,7 @@ export class PlayerDataManager {
   // Debug info
   debugGetManagersInfo() {
     if (process.env.NODE_ENV === 'development') {
-      console.log('🛠️ DEBUG: Managers info:', {
+      logger.debug('🛠️ DEBUG: Managers info:', {
         economy: !!this.economy,
         attributes: !!this.attributesManager,
         customization: !!this.customizationManager,
@@ -406,4 +407,4 @@ if (typeof window !== 'undefined') {
   }
 }
 
-console.log('💾 PlayerDataManager v3.0 (Modular) initialized!');
+logger.info('💾 PlayerDataManager v3.0 (Modular) initialized!');

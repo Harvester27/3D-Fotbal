@@ -1,5 +1,6 @@
 // src/MatchManager.js - Jednoduchý systém časomíry a skóre
 import { playerDataManager } from './PlayerDataManager.js';
+import * as logger from './utils/logger.js';
 
 class MatchManager {
   constructor() {
@@ -36,7 +37,7 @@ class MatchManager {
     this.celebrationDuration = 3000; // 3 sekundy oslava
     this.isInCelebration = false;
     
-    console.log('⚽ MatchManager initialized - 1 minute match ready!');
+    logger.info('⚽ MatchManager initialized - 1 minute match ready!');
     MatchManager.instance = this;
   }
   
@@ -44,7 +45,7 @@ class MatchManager {
   
   startMatch() {
     if (this.matchState === 'ended') {
-      console.log('❌ Cannot start - match already ended');
+      logger.warn('❌ Cannot start - match already ended');
       return false;
     }
     
@@ -52,7 +53,7 @@ class MatchManager {
     this.isPaused = false;
     this.matchState = 'playing';
     
-    console.log('🚀 Match started! Duration: 1 minute');
+    logger.info('🚀 Match started! Duration: 1 minute');
     this.notifyListeners('stateChange', { 
       state: 'playing', 
       time: this.currentTime,
@@ -68,7 +69,7 @@ class MatchManager {
     this.isPaused = true;
     this.matchState = 'paused';
     
-    console.log('⏸️ Match paused');
+    logger.info('⏸️ Match paused');
     this.notifyListeners('stateChange', { 
       state: 'paused', 
       time: this.currentTime,
@@ -84,7 +85,7 @@ class MatchManager {
     this.isPaused = false;
     this.matchState = 'playing';
     
-    console.log('▶️ Match resumed');
+    logger.info('▶️ Match resumed');
     this.notifyListeners('stateChange', { 
       state: 'playing', 
       time: this.currentTime,
@@ -107,7 +108,7 @@ class MatchManager {
       this.matchResult = 'draw';
     }
     
-    console.log(`🏁 Match ended! Result: ${this.matchResult}`, this.score);
+    logger.info(`🏁 Match ended! Result: ${this.matchResult}`, this.score);
     
     // PlayerData rewards
     this.giveMatchRewards();
@@ -136,14 +137,14 @@ class MatchManager {
     // Započítání gólu
     if (team === 'player') {
       this.score.player++;
-      console.log(`⚽ GÓL! Hráč skóroval! ${this.score.player}-${this.score.opponent}`);
+      logger.info(`⚽ GÓL! Hráč skóroval! ${this.score.player}-${this.score.opponent}`);
       
       // PlayerData reward
       playerDataManager.rewardGoal();
       
     } else if (team === 'opponent') {
       this.score.opponent++;
-      console.log(`😞 Soupeř skórował! ${this.score.player}-${this.score.opponent}`);
+      logger.info(`😞 Soupeř skórował! ${this.score.player}-${this.score.opponent}`);
     }
     
     // Notify listeners
@@ -156,7 +157,7 @@ class MatchManager {
     // Ukončení oslavy po 3 sekundách
     setTimeout(() => {
       this.isInCelebration = false;
-      console.log('🎉 Goal celebration ended');
+      logger.debug('🎉 Goal celebration ended');
     }, this.celebrationDuration);
     
     return true;
@@ -260,7 +261,7 @@ class MatchManager {
     this.isInCelebration = false;
     this.lastGoalTime = 0;
     
-    console.log('🔄 Match reset - ready for new game');
+    logger.info('🔄 Match reset - ready for new game');
     this.notifyListeners('stateChange', { 
       state: 'ready', 
       time: 0,
@@ -279,19 +280,19 @@ class MatchManager {
         playerDataManager.addCoins(baseCoins * 2, 'match_win');
         playerDataManager.addExperience(baseExp * 2, 'match_win');
         playerDataManager.stats.matchesWon++;
-        console.log('🏆 Victory rewards: +100 coins, +50 EXP');
+        logger.info('🏆 Victory rewards: +100 coins, +50 EXP');
         break;
         
       case 'draw':
         playerDataManager.addCoins(baseCoins, 'match_draw');
         playerDataManager.addExperience(baseExp, 'match_draw');
-        console.log('🤝 Draw rewards: +50 coins, +25 EXP');
+        logger.info('🤝 Draw rewards: +50 coins, +25 EXP');
         break;
         
       case 'lose':
         playerDataManager.addCoins(baseCoins / 2, 'match_participation');
         playerDataManager.addExperience(baseExp / 2, 'match_participation');
-        console.log('💪 Participation rewards: +25 coins, +12 EXP');
+        logger.info('💪 Participation rewards: +25 coins, +12 EXP');
         break;
     }
     
@@ -323,7 +324,7 @@ class MatchManager {
         try {
           callback(data);
         } catch (error) {
-          console.error(`Error in ${event} listener:`, error);
+          logger.error(`Error in ${event} listener:`, error);
         }
       });
     }
@@ -361,7 +362,7 @@ class MatchManager {
   // === DEBUG ===
   
   debugInfo() {
-    console.log('⚽ MatchManager Debug Info:', {
+    logger.debug('⚽ MatchManager Debug Info:', {
       time: `${this.currentTime.toFixed(1)}s / ${this.matchDuration}s`,
       formattedTime: this.getFormattedTime(),
       score: this.getScoreString(),

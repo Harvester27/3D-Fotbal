@@ -1,5 +1,6 @@
 // src/StadiumManager/StadiumManagerValidation.js - 🌍 VALIDATION SYSTEM
 
+import * as logger from '../utils/logger.js';
 export class StadiumManagerValidation {
     constructor(stadiumManager) {
       this.stadiumManager = stadiumManager;

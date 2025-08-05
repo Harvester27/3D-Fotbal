@@ -1,5 +1,6 @@
 // src/StadiumManager/StadiumManagerTerrain.js - 🎨 TERRAIN PAINTING SYSTEM
 import { THREE } from '../three.js';
+import * as logger from '../utils/logger.js';
 
 export class StadiumManagerTerrain {
   constructor(stadiumManager) {

@@ -1,5 +1,6 @@
 // src/StadiumManager/StadiumManagerUtility.js - 🛠️ UTILITY FUNCTIONS
 import { StadiumBuilder } from '../StadiumBuilder.js';
+import * as logger from '../utils/logger.js';
 
 export class StadiumManagerUtility {
   constructor(stadiumManager) {
@@ -20,11 +21,11 @@ export class StadiumManagerUtility {
         mesh = this.stadiumManager.terrain.createAccumulatedTerrain(element.position, element.currentHeight || 0, element.type);
         this.stadiumManager.terrainMeshes.set(element.gridKey, mesh);
         
-        console.log(`🎨 Restored terrain brush: ${element.type} at ${element.gridKey} with height ${element.currentHeight}m`);
+        logger.debug(`🎨 Restored terrain brush: ${element.type} at ${element.gridKey} with height ${element.currentHeight}m`);
       }
       // 🪑 SPECIÁLNÍ HANDLING pro sedačky - použij uložené options
       else if (element.type === 'individual_seat') {
-        console.log(`🪑 Recreating existing seat with saved options:`, {
+        logger.debug(`🪑 Recreating existing seat with saved options:`, {
           seatType: element.seatType || 'plastic',
           seatColor: element.seatColor || 'blue',
           position: element.position
@@ -79,7 +80,7 @@ export class StadiumManagerUtility {
     // 🪑 Vymaž i seat preview
     this.stadiumManager.seat.clearSeatPreview();
     
-    console.log(`🎨 Cleared all stadium elements and terrain data`);
+    logger.debug(`🎨 Cleared all stadium elements and terrain data`);
   }
 
   // Complete disposal of all resources
