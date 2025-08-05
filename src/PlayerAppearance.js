@@ -684,9 +684,9 @@ export class PlayerAppearance {
     // Rameno s anatomickými detaily
     const shoulder = new THREE.Mesh(
       new THREE.SphereGeometry(0.11, 16, 12),
-      new THREE.MeshStandardMaterial({
+      new THREE.MeshPhongMaterial({
         color: jerseyColor,
-        roughness: 0.4,
+        shininess: 20,
         flatShading: false
       })
     );
@@ -695,9 +695,9 @@ export class PlayerAppearance {
     // Horní část paže (biceps)
     const upperArm = new THREE.Mesh(
       new THREE.CylinderGeometry(0.08, 0.09, 0.25, 16, 8),
-      new THREE.MeshStandardMaterial({
+      new THREE.MeshPhongMaterial({
         color: jerseyColor,
-        roughness: 0.4,
+        shininess: 20,
         flatShading: false
       })
     );
@@ -706,10 +706,10 @@ export class PlayerAppearance {
     
     // Loket
     const elbow = new THREE.Mesh(
-      new THREE.SphereGeometry(0.07, 12, 8),
-      new THREE.MeshStandardMaterial({
+      new THREE.SphereGeometry(0.05, 12, 8),
+      new THREE.MeshPhongMaterial({
         color: skinColor,
-        roughness: 0.5
+        shininess: 10
       })
     );
     elbow.position.y = -0.25;
@@ -718,9 +718,9 @@ export class PlayerAppearance {
     // Předloktí
     const forearm = new THREE.Mesh(
       new THREE.CylinderGeometry(0.05, 0.07, 0.25, 16, 8),
-      new THREE.MeshStandardMaterial({
+      new THREE.MeshPhongMaterial({
         color: skinColor,
-        roughness: 0.4,
+        shininess: 10,
         flatShading: false
       })
     );
@@ -730,9 +730,9 @@ export class PlayerAppearance {
     // Zápěstí
     const wrist = new THREE.Mesh(
       new THREE.CylinderGeometry(0.04, 0.05, 0.05, 12, 4),
-      new THREE.MeshStandardMaterial({
+      new THREE.MeshPhongMaterial({
         color: skinColor,
-        roughness: 0.5
+        shininess: 10
       })
     );
     wrist.position.y = -0.5;
@@ -744,9 +744,9 @@ export class PlayerAppearance {
     // Dlaň
     const palm = new THREE.Mesh(
       new THREE.BoxGeometry(0.08, 0.1, 0.03),
-      new THREE.MeshStandardMaterial({
+      new THREE.MeshPhongMaterial({
         color: skinColor,
-        roughness: 0.5
+        shininess: 10
       })
     );
     palm.position.y = -0.05;
@@ -756,9 +756,9 @@ export class PlayerAppearance {
     for (let i = 0; i < 4; i++) {
       const finger = new THREE.Mesh(
         new THREE.CylinderGeometry(0.008, 0.01, 0.06, 8, 4),
-        new THREE.MeshStandardMaterial({
+        new THREE.MeshPhongMaterial({
           color: skinColor,
-          roughness: 0.5
+          shininess: 10
         })
       );
       finger.position.set((i - 1.5) * 0.018, -0.13, 0);
@@ -769,9 +769,9 @@ export class PlayerAppearance {
     // Palec
     const thumb = new THREE.Mesh(
       new THREE.CylinderGeometry(0.01, 0.012, 0.04, 8, 4),
-      new THREE.MeshStandardMaterial({
+      new THREE.MeshPhongMaterial({
         color: skinColor,
-        roughness: 0.5
+        shininess: 10
       })
     );
     thumb.position.set(side * 0.04, -0.08, 0.01);
@@ -795,9 +795,9 @@ export class PlayerAppearance {
     const thighGeometry = new THREE.CylinderGeometry(0.13, 0.11, 0.35, 16, 8);
     const thigh = new THREE.Mesh(
       thighGeometry,
-      new THREE.MeshStandardMaterial({
+      new THREE.MeshPhongMaterial({
         color: shortsColor,
-        roughness: 0.5,
+        shininess: 20,
         flatShading: false
       })
     );
@@ -806,10 +806,10 @@ export class PlayerAppearance {
     
     // Koleno
     const knee = new THREE.Mesh(
-      new THREE.SphereGeometry(0.08, 12, 8),
-      new THREE.MeshStandardMaterial({
+      new THREE.SphereGeometry(0.06, 12, 8),
+      new THREE.MeshPhongMaterial({
         color: skinColor,
-        roughness: 0.5
+        shininess: 10
       })
     );
     knee.position.y = -0.35;
@@ -820,9 +820,9 @@ export class PlayerAppearance {
     const calfGeometry = new THREE.CylinderGeometry(0.08, 0.06, 0.35, 16, 8);
     const calf = new THREE.Mesh(
       calfGeometry,
-      new THREE.MeshStandardMaterial({
+      new THREE.MeshPhongMaterial({
         color: skinColor,
-        roughness: 0.4,
+        shininess: 10,
         flatShading: false
       })
     );
@@ -832,9 +832,9 @@ export class PlayerAppearance {
     // Kotník
     const ankle = new THREE.Mesh(
       new THREE.SphereGeometry(0.055, 12, 8),
-      new THREE.MeshStandardMaterial({
+      new THREE.MeshPhongMaterial({
         color: skinColor,
-        roughness: 0.5
+        shininess: 10
       })
     );
     ankle.position.y = -0.7;
