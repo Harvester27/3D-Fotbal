@@ -298,6 +298,31 @@ export class PlayerAppearance {
       metalness: 0.05,
       flatShading: false
     });
+
+    // Jednoduchá textura a normal mapa pro detaily vlasů
+    const hairCanvas = document.createElement('canvas');
+    hairCanvas.width = hairCanvas.height = 64;
+    const hCtx = hairCanvas.getContext('2d');
+    hCtx.fillStyle = '#888888';
+    hCtx.fillRect(0, 0, 64, 64);
+    hCtx.fillStyle = '#555555';
+    for (let i = 0; i < 64; i += 4) {
+      hCtx.fillRect(i, 0, 2, 64);
+    }
+    const hairTexture = new THREE.CanvasTexture(hairCanvas);
+
+    const normalCanvas = document.createElement('canvas');
+    normalCanvas.width = normalCanvas.height = 64;
+    const nCtx = normalCanvas.getContext('2d');
+    nCtx.fillStyle = '#8080ff';
+    nCtx.fillRect(0, 0, 64, 64);
+    const hairNormal = new THREE.CanvasTexture(normalCanvas);
+
+    hairMaterial.map = hairTexture;
+    hairMaterial.normalMap = hairNormal;
+
+    hairTexture.wrapS = hairTexture.wrapT = THREE.RepeatWrapping;
+    hairTexture.repeat.set(4, 4);
     
     console.log('👱 Creating hair style:', hairStyle);
     
@@ -427,6 +452,31 @@ export class PlayerAppearance {
         baseSpiky.position.y = 0.05;
         baseSpiky.scale.set(1.1, 0.7, 1.1);
         headGroup.add(baseSpiky);
+      } else if (hairStyle === 'wavy') {
+        // Vlnité vlasy
+        const baseHair = new THREE.Mesh(
+          new THREE.SphereGeometry(0.19, 24, 16),
+          hairMaterial
+        );
+        baseHair.position.y = 0.08;
+        baseHair.scale.set(1.1, 0.9, 1.1);
+        headGroup.add(baseHair);
+
+        for (let i = 0; i < 20; i++) {
+          const strand = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.02, 0.03, 0.2, 8, 1),
+            hairMaterial
+          );
+          const angle = (i / 20) * Math.PI * 2;
+          strand.position.set(
+            Math.cos(angle) * 0.16,
+            0.05,
+            Math.sin(angle) * 0.16
+          );
+          strand.rotation.z = Math.sin(angle * 2) * 0.2;
+          strand.rotation.x = Math.PI / 2;
+          headGroup.add(strand);
+        }
       } else if (hairStyle === 'ponytail') {
         // Culík
         const baseHair = new THREE.Mesh(
@@ -557,13 +607,13 @@ export class PlayerAppearance {
         new THREE.SphereGeometry(0.05, 16, 12),
         new THREE.MeshStandardMaterial({ color: skinColor })
       );
-      eyeSocket.position.set(side * 0.06, 0.02, 0.14);
-      eyeSocket.scale.set(1.2, 0.8, 0.6);
+      eyeSocket.position.set(side * 0.06, 0.02, 0.15);
+      eyeSocket.scale.set(1.2, 0.85, 0.65);
       headGroup.add(eyeSocket);
       
       const eyeWhite = new THREE.Mesh(eyeWhiteGeometry, eyeWhiteMaterial);
-      eyeWhite.position.set(side * 0.06, 0.02, 0.16);
-      eyeWhite.scale.set(1, 0.9, 0.7);
+      eyeWhite.position.set(side * 0.06, 0.02, 0.17);
+      eyeWhite.scale.set(1, 0.9, 0.75);
       headGroup.add(eyeWhite);
       
       // Duhovka
@@ -575,7 +625,7 @@ export class PlayerAppearance {
           metalness: 0.1
         })
       );
-      iris.position.set(side * 0.06, 0.02, 0.17);
+      iris.position.set(side * 0.06, 0.02, 0.175);
       iris.scale.set(1, 1, 0.5);
       headGroup.add(iris);
       
@@ -584,7 +634,7 @@ export class PlayerAppearance {
         new THREE.SphereGeometry(0.012, 12, 8),
         new THREE.MeshBasicMaterial({ color: 0x000000 })
       );
-      pupil.position.set(side * 0.06, 0.02, 0.175);
+      pupil.position.set(side * 0.06, 0.02, 0.178);
       headGroup.add(pupil);
       
       // Odlesk v oku
@@ -592,7 +642,7 @@ export class PlayerAppearance {
         new THREE.SphereGeometry(0.005, 8, 6),
         new THREE.MeshBasicMaterial({ color: 0xffffff })
       );
-      eyeHighlight.position.set(side * 0.065, 0.03, 0.18);
+      eyeHighlight.position.set(side * 0.065, 0.03, 0.182);
       headGroup.add(eyeHighlight);
       
       // Obočí
@@ -600,7 +650,7 @@ export class PlayerAppearance {
         new THREE.BoxGeometry(0.08, 0.01, 0.02),
         new THREE.MeshStandardMaterial({ color: hairColor })
       );
-      eyebrow.position.set(side * 0.06, 0.1, 0.16);
+      eyebrow.position.set(side * 0.06, 0.1, 0.17);
       eyebrow.rotation.z = side * 0.1;
       headGroup.add(eyebrow);
     }
@@ -627,7 +677,7 @@ export class PlayerAppearance {
         roughness: 0.5
       })
     );
-    nose.position.set(0, -0.01, 0.16);
+    nose.position.set(0, -0.01, 0.18);
     nose.rotation.x = -0.3;
     headGroup.add(nose);
     
@@ -642,7 +692,7 @@ export class PlayerAppearance {
         roughness: 0.4
       })
     );
-    upperLip.position.set(0, -0.06, 0.16);
+    upperLip.position.set(0, -0.06, 0.17);
     upperLip.rotation.z = Math.PI;
     upperLip.scale.set(1, 0.8, 1);
     mouthGroup.add(upperLip);
@@ -655,7 +705,7 @@ export class PlayerAppearance {
         roughness: 0.4
       })
     );
-    lowerLip.position.set(0, -0.075, 0.16);
+    lowerLip.position.set(0, -0.075, 0.17);
     mouthGroup.add(lowerLip);
     
     headGroup.add(mouthGroup);
