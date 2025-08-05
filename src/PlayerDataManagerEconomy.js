@@ -9,7 +9,12 @@ export class PlayerEconomyManager {
       this.realMoneyBalance = 0;     // Skutečný zůstatek v CZK
       
       // 🎁 Daily rewards tracker
-      this.dailyRewards = {
+      // Načti uložený stav z localStorage, aby se po F5 nezresetoval
+      const savedRewards = typeof window !== 'undefined'
+        ? JSON.parse(localStorage.getItem('dailyRewards') || 'null')
+        : null;
+
+      this.dailyRewards = savedRewards || {
         lastClaim: null,
         streak: 0,
         nextReward: 500000       // 🚀 Vyšší denní odměny pro bohaté hráče!
@@ -88,7 +93,8 @@ export class PlayerEconomyManager {
         
         // Check if streak continues (claimed within 48 hours)
         if (hoursSinceLastClaim <= 48) {
-          this.dailyRewards.streak++;
+          // 30denní cyklus - po 30 dnech se vrátí na den 1
+          this.dailyRewards.streak = (this.dailyRewards.streak % 30) + 1;
         } else {
           this.dailyRewards.streak = 1;
         }
@@ -116,6 +122,11 @@ export class PlayerEconomyManager {
       
       this.dailyRewards.lastClaim = now;
       this.dailyRewards.nextReward = baseReward + Math.min((this.dailyRewards.streak + 1) * 100000, 2000000);
+
+      // Ulož stav do localStorage, aby se po restartu zachoval
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('dailyRewards', JSON.stringify(this.dailyRewards));
+      }
       
       this.addCoins(totalReward, `Daily reward (${this.dailyRewards.streak} day streak)`);
       if (gemReward > 0) {
@@ -224,8 +235,23 @@ export class PlayerEconomyManager {
       this.virtualCoins = data.virtualCoins ?? this.virtualCoins;
       this.premiumGems = data.premiumGems ?? this.premiumGems;
       this.realMoneyBalance = data.realMoneyBalance ?? this.realMoneyBalance;
-      this.dailyRewards = { ...this.dailyRewards, ...data.dailyRewards };
-      
+      if (data.dailyRewards) {
+        const localLast = this.dailyRewards.lastClaim ? new Date(this.dailyRewards.lastClaim) : null;
+        const remoteLast = data.dailyRewards.lastClaim ? new Date(data.dailyRewards.lastClaim) : null;
+
+        // Ponech si novější záznam - nevracej se k starším odměnám
+        if (remoteLast && (!localLast || remoteLast > localLast)) {
+          this.dailyRewards = { ...this.dailyRewards, ...data.dailyRewards };
+        } else {
+          this.dailyRewards = { ...data.dailyRewards, ...this.dailyRewards };
+        }
+      }
+
+      // Aktualizuj localStorage, aby se data zachovala mezi relacemi
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('dailyRewards', JSON.stringify(this.dailyRewards));
+      }
+
       this._coinFormatted = this.virtualCoins.toLocaleString('cs-CZ');
     }
     
