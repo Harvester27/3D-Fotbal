@@ -24,6 +24,9 @@ import { playerDataManager } from './PlayerDataManager.js';
 // Import MatchManager
 import { matchManager } from './MatchManager.js';
 
+// 🎆 Import Goal Celebration System
+import GoalCelebrationSystem from './GoalCelebrationSystem.js';
+
 export class FootballFieldCore {
   constructor() {
     // Manager refs
@@ -35,12 +38,15 @@ export class FootballFieldCore {
     this.manualCameraController = null;
     this.animationManager = null;
     this.gameStateManager = null;
-    
+
     // Player refs
     this.player = null;
     this.ball = null;
     this.aiPlayer = null;
     this.aiController = null;
+
+    // 🎆 Goal celebration system
+    this.celebrationSystem = null;
     
     // Camera persistence system
     this.cameraState = {
@@ -565,9 +571,16 @@ export class FootballFieldCore {
     
     // Create players and ball for game mode
     if (gameState === 'playing') {
+      // 🎆 Create celebration system FIRST (before ball)
+      this.celebrationSystem = new GoalCelebrationSystem(scene, camera);
+      console.log('🎆 Goal Celebration System created!');
+
       this.player = new FootballPlayer(scene, { x: 0, y: 0, z: 8 });
       this.ball = new FootballBall(scene, { x: 0, y: 1, z: 0 });
-      
+
+      // 🎆 Pass celebration system to ball
+      this.ball.celebrationSystem = this.celebrationSystem;
+
       playerRef.current = this.player;
       ballRef.current = this.ball;
       
@@ -676,6 +689,14 @@ export class FootballFieldCore {
         window.fieldUtils.updateNetAnimations(deltaTime);
       });
       console.log('✅ Net animations registered with AnimationManager');
+    }
+
+    // 🎆 NOVÉ: Přidej celebration system callback
+    if (this.celebrationSystem) {
+      this.animationManager.addUpdateCallback('celebrationSystem', (deltaTime) => {
+        this.celebrationSystem.update(deltaTime);
+      });
+      console.log('🎆 Celebration system registered with AnimationManager');
     }
     
     this.animationManager.start();

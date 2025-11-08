@@ -353,17 +353,39 @@ export default class FootballBall {
     const goalTeam = this.checkGoalScored();
     if (goalTeam) {
       console.log(`⚽ GOAL DETECTED! Team: ${goalTeam}`);
-      
+
       // Zavolej MatchManager
       const goalScored = matchManager.scoreGoal(goalTeam);
       if (goalScored) {
+        // 🎆 TRIGGER CELEBRATION!
+        if (this.celebrationSystem) {
+          // Calculate goal quality parameters
+          const shotPower = Math.min(100, this.velocity.length() * 20); // Estimate power from velocity
+          const goalPosition = this.mesh.position.clone();
+          const distance = Math.abs(goalPosition.x); // Distance from center
+
+          // Check if it's a winning goal
+          const currentScore = matchManager.getCurrentState();
+          const isWinningGoal = (goalTeam === 'player' && currentScore.playerScore > currentScore.opponentScore) ||
+                                (goalTeam === 'opponent' && currentScore.opponentScore > currentScore.playerScore);
+
+          console.log(`🎆 Triggering celebration! Power: ${shotPower.toFixed(0)}, Distance: ${distance.toFixed(1)}, Winning: ${isWinningGoal}`);
+
+          this.celebrationSystem.celebrate(
+            goalPosition,
+            shotPower,
+            distance,
+            isWinningGoal
+          );
+        }
+
         // Reset míče na střed po gólu (s delay)
         setTimeout(() => {
           this.resetPosition({ x: 0, y: 0.5, z: 0 });
           this.wasInGoalArea.left = false;
           this.wasInGoalArea.right = false;
           console.log('🔄 Ball reset to center after goal');
-        }, 1500); // 1.5 sekunda delay pro goal celebration
+        }, 3000); // 3 sekundy delay pro goal celebration (prodlouženo kvůli oslavám)
       }
     }
     

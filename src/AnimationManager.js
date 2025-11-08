@@ -11,13 +11,16 @@ export class AnimationManager {
     this.gameStateManager = gameStateManager;
     this.gameEventHandlers = gameEventHandlers; // Může být null v editor módu
     this.manualCameraController = manualCameraController; // Manual camera controller
-    
+
     // 🔥 NOVÉ: AI Controller reference
     this.aiController = aiController;
-    
+
+    // 🎆 NOVÉ: Update callbacks system
+    this.updateCallbacks = new Map();
+
     this.animationFrameId = null;
     this.cameraSmoothness = 0.12; // Základní plynulost pro mouse offset
-    
+
     // Bind animate method
     this.animate = this.animate.bind(this);
   }
@@ -35,23 +38,32 @@ export class AnimationManager {
 
   animate() {
     this.animationFrameId = requestAnimationFrame(this.animate);
-    
+
     const deltaTime = this.clock.getDelta();
-    
+
     // Update hráče a míče pouze v režimu hry
     this.updateGameObjects(deltaTime);
-    
+
     // Update UI stavů
     this.updateUIStates();
-    
+
     // Update manual camera controller (pouze v editoru)
     if (this.manualCameraController) {
       this.manualCameraController.update(deltaTime);
     }
-    
+
+    // 🎆 NOVÉ: Call all registered update callbacks
+    this.updateCallbacks.forEach((callback, name) => {
+      try {
+        callback(deltaTime);
+      } catch (error) {
+        console.error(`❌ Error in update callback '${name}':`, error);
+      }
+    });
+
     // 🔥 KRITICKÁ ZMĚNA: Absolutní ochrana user controlled kamery
     this.updateCameraSystem(deltaTime);
-    
+
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -344,9 +356,30 @@ export class AnimationManager {
     }
   }
 
+  // 🎆 NOVÉ: Add update callback
+  addUpdateCallback(name, callback) {
+    if (typeof callback !== 'function') {
+      console.error(`❌ Callback '${name}' must be a function`);
+      return;
+    }
+    this.updateCallbacks.set(name, callback);
+    console.log(`✅ Update callback '${name}' registered`);
+  }
+
+  // 🎆 NOVÉ: Remove update callback
+  removeUpdateCallback(name) {
+    if (this.updateCallbacks.has(name)) {
+      this.updateCallbacks.delete(name);
+      console.log(`🗑️ Update callback '${name}' removed`);
+    }
+  }
+
   dispose() {
     this.stop();
-    
+
+    // Clear all update callbacks
+    this.updateCallbacks.clear();
+
     // 🔥 NOVÉ: Cleanup AI controller
     if (this.aiController) {
       this.aiController = null;
